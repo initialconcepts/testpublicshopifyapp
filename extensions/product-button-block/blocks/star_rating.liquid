@@ -1,0 +1,51 @@
+<button
+  id="generate-product-btn-{{ block.id }}"
+  style="background-color: {{ block.settings.button_color }}; color: {{ block.settings.text_color }}; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;"
+>
+  {{ block.settings.button_text }}
+</button>
+
+<div id="generate-product-message-{{ block.id }}" style="margin-top: 10px;"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const btn = document.getElementById("generate-product-btn-{{ block.id }}");
+  const msg = document.getElementById("generate-product-message-{{ block.id }}");
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    btn.innerText = "Generating…";
+
+    try {
+      // Use Shopify App Proxy path (no full domain)
+      const res = await fetch("/apps/public-product", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+
+      const data = await res.json();
+      msg.innerText = "Product generated: " + data.title;
+    } catch (err) {
+      console.error(err);
+      msg.innerText = "Error generating product";
+    } finally {
+      btn.disabled = false;
+      btn.innerText = "{{ block.settings.button_text }}";
+    }
+  });
+});
+</script>
+
+
+
+{% schema %}
+{
+  "name": "Generate Product Button",
+  "target": "section",
+  "settings": [
+    { "type": "text", "id": "button_text", "label": "Button Text", "default": "Generate a Product" },
+    { "type": "color", "id": "button_color", "label": "Button Color", "default": "#008060" },
+    { "type": "color", "id": "text_color", "label": "Text Color", "default": "#ffffff" }
+  ]
+}
+{% endschema %}
